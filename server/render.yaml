@@ -12,6 +12,6 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://your-app.vercel.app
+        value: https://efootball-tournament-tpha.vercel.app/
       - key: DATABASE_URL
         value: file:./dev.db
