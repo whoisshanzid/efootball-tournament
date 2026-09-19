@@ -1,6 +1,13 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || '/api'
+function resolveApiUrl() {
+  const raw = import.meta.env.VITE_API_URL || ''
+  if (!raw) return '/api'
+  const base = raw.replace(/\/+$/, '')
+  return base.endsWith('/api') ? base : `${base}/api`
+}
+
+const API_URL = resolveApiUrl()
 
 const TOKEN_KEY = 'ef_token'
 const USERNAME_KEY = 'ef_username'
