@@ -1,0 +1,15 @@
+{
+  "name": "efootball-tournament",
+  "version": "1.0.0",
+  "description": "eFootball tournament point table management app",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n server,client -c green,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "install-all": "npm install --prefix server && npm install --prefix client",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

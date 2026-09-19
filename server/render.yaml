@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: efootball-api
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && node prisma/seed.js && node index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://your-app.vercel.app
+      - key: DATABASE_URL
+        value: file:/data/dev.db
+    disks:
+      - name: efootball-data
+        mountPath: /data
+        sizeGB: 1

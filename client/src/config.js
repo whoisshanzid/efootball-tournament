@@ -1,0 +1,8 @@
+export const CLUB_NAME = 'Universal Unity FC'
+export const CLUB_SHORT = 'UUFC'
+export const TOURNAMENT_NAME = 'UUFC Champions League'
+export const CSV_PREFIX = 'uufc-champions-league'
+export const ADMIN_USERNAME = 'HotSa1t'
+export const ADMIN_PASSWORD = '735123'
+export const APP_AUTHOR = 'Shanzid Hasan'
+export const APP_AUTHOR_URL = 'https://www.facebook.com/whoisshanzid/'
