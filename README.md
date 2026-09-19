@@ -136,24 +136,23 @@ git push -u origin main
 ### 2. Deploy the API — Render (or Railway)
 
 **Render (recommended) — one-click blueprint:**
-A `server/render.yaml` blueprint is included. It auto-creates the web service, a **persistent disk**, a random `JWT_SECRET`, runs migrations + seeds on boot, and sets a `/api/health` health check.
+A `server/render.yaml` blueprint is included (free plan). It auto-creates the web service, auto-generates `JWT_SECRET`, runs migrations + seed on boot, and sets a `/api/health` health check.
 
 1. In Render, go to **New → Blueprint** and connect the GitHub repo.
-2. Render reads `server/render.yaml` and provisions the service (plan: `starter`, disk: 1 GB).
+2. Render reads `server/render.yaml` and provisions the service (`plan: free`, no credit card).
 3. After the first deploy, set `CORS_ORIGIN` to your real Vercel URL and re-deploy (or set it in the blueprint first).
 
-The `startCommand` runs `prisma migrate deploy` + `prisma db seed` on every boot; the seed is idempotent, so **your admin credentials (and data) are never reset** on redeploys — it only creates the admin if none exists.
+The `startCommand` runs `prisma migrate deploy` + `prisma db seed` on every boot; the seed is idempotent, so your admin login is never reset — it only creates the admin if none exists.
 
 **Manual alternative:** New → Web Service with:
 - **Build command:** `cd server && npm install && npx prisma generate`
 - **Start command:** `cd server && npx prisma migrate deploy && node prisma/seed.js && npm start`
-- Env vars: `DATABASE_URL` = `file:/data/dev.db` (path on persistent disk), `JWT_SECRET` (long random), `CORS_ORIGIN`.
-- **Add a persistent disk** (paid). Free-tier storage is ephemeral — your data would reset on every redeploy.
+- Env vars: `DATABASE_URL` = `file:./dev.db`, `JWT_SECRET` (long random), `CORS_ORIGIN`.
 
-**Railway alternative:** same procedure — attach a volume and set `DATABASE_URL` to a path on it.
+**Railway alternative:** same procedure — attach a volume and set `DATABASE_URL` to a path on it (volumes require a paid plan).
 
 #### ⚠️ SQLite persistence note
-Free tiers of Render/Railway use **ephemeral storage**: the SQLite file is wiped whenever the service restarts or redeploys. To keep data, use a paid plan with a **persistent disk / volume** and point `DATABASE_URL` at it. (If truly free is the goal, a small VPS is the more reliable option for SQLite.)
+The free `render.yaml` uses Render's **ephemeral filesystem**: the SQLite file (`file:./dev.db`) is wiped whenever the service **restarts or redeploys**. Fine for testing/demo — the admin login (`HotSa1t` / `735123`) is re-seeded automatically on every boot. For permanent data, use a paid plan (`0.5c-512mb`) with a persistent disk (mount it and set `DATABASE_URL` to a path on it, e.g. `file:/data/dev.db`).
 
 ### 3. Deploy the frontend — Vercel
 
