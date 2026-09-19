@@ -13,5 +13,3 @@ services:
         generateValue: true
       - key: CORS_ORIGIN
         value: https://efootball-tournament-tpha.vercel.app
-      - key: DATABASE_URL
-        value: file:./dev.db

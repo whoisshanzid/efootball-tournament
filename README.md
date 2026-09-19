@@ -135,24 +135,23 @@ git push -u origin main
 
 ### 2. Deploy the API — Render (or Railway)
 
+**Database — Neon (free Postgres, persistent):**
+The app uses **PostgreSQL** (Prisma) so data survives redeploys and restarts. Create a free database at `neon.tech`, then set `DATABASE_URL` (the connection string) as an environment variable on Render (`Settings → Environment → DATABASE_URL`). The `render.yaml` blueprint **does not** define `DATABASE_URL` so your value is never overwritten by blueprint syncs. On every boot the `startCommand` runs `prisma migrate deploy` (creates the tables) + `prisma db seed` (idempotent — only seeds the admin if none exists, so your credentials/data are never reset).
+
 **Render (recommended) — one-click blueprint:**
 A `server/render.yaml` blueprint is included (free plan). It auto-creates the web service, auto-generates `JWT_SECRET`, runs migrations + seed on boot, and sets a `/api/health` health check.
 
 1. In Render, go to **New → Blueprint** and connect the GitHub repo.
 2. Render reads `server/render.yaml` and provisions the service (`plan: free`, no credit card).
 3. After the first deploy, set `CORS_ORIGIN` to your real Vercel URL and re-deploy (or set it in the blueprint first).
-
-The `startCommand` runs `prisma migrate deploy` + `prisma db seed` on every boot; the seed is idempotent, so your admin login is never reset — it only creates the admin if none exists.
+4. Set `DATABASE_URL` to your **Neon** connection string (see above).
 
 **Manual alternative:** New → Web Service with:
 - **Build command:** `cd server && npm install && npx prisma generate`
 - **Start command:** `cd server && npx prisma migrate deploy && node prisma/seed.js && npm start`
-- Env vars: `DATABASE_URL` = `file:./dev.db`, `JWT_SECRET` (long random), `CORS_ORIGIN`.
+- Env vars: `DATABASE_URL` (Neon Postgres URL), `JWT_SECRET` (long random), `CORS_ORIGIN`.
 
-**Railway alternative:** same procedure — attach a volume and set `DATABASE_URL` to a path on it (volumes require a paid plan).
-
-#### ⚠️ SQLite persistence note
-The free `render.yaml` uses Render's **ephemeral filesystem**: the SQLite file (`file:./dev.db`) is wiped whenever the service **restarts or redeploys**. Fine for testing/demo — the admin login (`HotSa1t` / `735123`) is re-seeded automatically on every boot. For permanent data, use a paid plan (`0.5c-512mb`) with a persistent disk (mount it and set `DATABASE_URL` to a path on it, e.g. `file:/data/dev.db`).
+> ⚠️ **Data persistence:** because the database is hosted at Neon (not on Render's ephemeral filesystem), your players, matches, and admin credentials **survive every redeploy/restart**. Never point `DATABASE_URL` back to a local `file:` path.
 
 ### 3. Deploy the frontend — Vercel
 
