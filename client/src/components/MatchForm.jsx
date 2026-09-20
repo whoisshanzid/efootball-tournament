@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import PlayerSelect from './PlayerSelect'
 
 export default function MatchForm({ players, initial = null, onSubmit, onCancel = null, submitting = false }) {
   const [homeId, setHomeId] = useState('')
@@ -49,36 +50,22 @@ export default function MatchForm({ players, initial = null, onSubmit, onCancel 
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-muted">Home Player</span>
-          <select
-            value={homeId}
-            onChange={(e) => setHomeId(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">Select home player…</option>
-            {players.map((p) => (
-              <option key={p.id} value={p.id} disabled={String(p.id) === String(awayId)}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-muted">Away Player</span>
-          <select
-            value={awayId}
-            onChange={(e) => setAwayId(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">Select away player…</option>
-            {players.map((p) => (
-              <option key={p.id} value={p.id} disabled={String(p.id) === String(homeId)}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <PlayerSelect
+          label="Home Player"
+          players={players}
+          value={homeId}
+          onChange={setHomeId}
+          excludeId={awayId}
+          placeholder="Search home player…"
+        />
+        <PlayerSelect
+          label="Away Player"
+          players={players}
+          value={awayId}
+          onChange={setAwayId}
+          excludeId={homeId}
+          placeholder="Search away player…"
+        />
       </div>
 
       {played && (

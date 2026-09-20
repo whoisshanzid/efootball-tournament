@@ -36,6 +36,12 @@ export default function Navbar() {
           <NavLink to="/" className={linkClass} end>
             Point Table
           </NavLink>
+          <NavLink to="/players" className={linkClass}>
+            Players
+          </NavLink>
+          <NavLink to="/knockout" className={linkClass}>
+            Super 16
+          </NavLink>
           {isAuthenticated ? (
             <>
               <NavLink to="/admin" className={linkClass}>

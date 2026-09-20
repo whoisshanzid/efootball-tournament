@@ -2,6 +2,7 @@ const express = require('express')
 const { requireAuth } = require('../middleware/auth')
 const {
   listPlayers,
+  getPlayerProfile,
   createPlayer,
   updatePlayer,
   deletePlayer,
@@ -10,6 +11,7 @@ const {
 const router = express.Router()
 
 router.get('/', listPlayers)
+router.get('/:id/profile', getPlayerProfile)
 router.post('/', requireAuth, createPlayer)
 router.put('/:id', requireAuth, updatePlayer)
 router.delete('/:id', requireAuth, deletePlayer)

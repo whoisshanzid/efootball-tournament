@@ -7,7 +7,7 @@ const DRAW_POINTS = 1
 
 async function getStandings(req, res) {
   const playedMatches = await prisma.match.findMany({
-    where: { played: true },
+    where: { played: true, stage: 'GROUP' },
     select: { homeId: true, awayId: true, homeScore: true, awayScore: true },
   })
 

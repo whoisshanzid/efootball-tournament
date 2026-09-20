@@ -9,6 +9,51 @@ const matchInclude = {
   },
 }
 
+const SLOT_RANGES = { R16: [1, 8], QF: [1, 4], SF: [1, 2], F: [1, 1] }
+const KNOCKOUT_STAGES = Object.keys(SLOT_RANGES)
+
+function isKnockoutStage(stage) {
+  return KNOCKOUT_STAGES.includes(stage)
+}
+
+function isInt(n) {
+  return Number.isInteger(n)
+}
+
+async function validateStageSlot(stage, slot, excludeMatchId = null) {
+  const resolvedStage = stage === undefined || stage === null ? 'GROUP' : stage
+
+  if (resolvedStage !== 'GROUP' && !isKnockoutStage(resolvedStage)) {
+    return { stage: 'GROUP', slot: 0, error: 'Invalid stage' }
+  }
+
+  if (resolvedStage === 'GROUP') {
+    return { stage: resolvedStage, slot: 0, error: null }
+  }
+
+  if (!isInt(slot)) {
+    return { stage: resolvedStage, slot, error: 'A valid bracket slot is required' }
+  }
+
+  const [min, max] = SLOT_RANGES[resolvedStage]
+  if (slot < min || slot > max) {
+    return { stage: resolvedStage, slot, error: `Slot must be ${min}-${max} for stage ${resolvedStage}` }
+  }
+
+  const taken = await prisma.match.findFirst({
+    where: {
+      stage: resolvedStage,
+      slot,
+      ...(excludeMatchId ? { NOT: { id: excludeMatchId } } : {}),
+    },
+  })
+  if (taken) {
+    return { stage: resolvedStage, slot, error: 'That bracket slot is already taken' }
+  }
+
+  return { stage: resolvedStage, slot, error: null }
+}
+
 async function listMatches(req, res) {
   const matches = await prisma.match.findMany({
     ...matchInclude,
@@ -18,7 +63,7 @@ async function listMatches(req, res) {
 }
 
 async function createMatch(req, res) {
-  const { homeId, awayId, homeScore, awayScore, played } = req.body || {}
+  const { homeId, awayId, homeScore, awayScore, played, stage, slot } = req.body || {}
   const [home, away] = [Number(homeId), Number(awayId)]
 
   if (!home || !away) {
@@ -43,8 +88,25 @@ async function createMatch(req, res) {
     return res.status(400).json({ error: 'Valid home and away scores are required' })
   }
 
+  const { stage: resolvedStage, slot: resolvedSlot, error: slotError } = await validateStageSlot(stage, Number(slot))
+  if (slotError) {
+    return res.status(400).json({ error: slotError })
+  }
+
+  if (isKnockoutStage(resolvedStage) && isPlayed && hScore === aScore) {
+    return res.status(400).json({ error: 'Knockout matches cannot end in a draw' })
+  }
+
   const match = await prisma.match.create({
-    data: { homeId: home, awayId: away, homeScore: hScore, awayScore: aScore, played: isPlayed },
+    data: {
+      homeId: home,
+      awayId: away,
+      homeScore: hScore,
+      awayScore: aScore,
+      played: isPlayed,
+      stage: resolvedStage,
+      slot: resolvedSlot,
+    },
     ...matchInclude,
   })
   res.status(201).json(match)
@@ -53,7 +115,7 @@ async function createMatch(req, res) {
 async function updateMatch(req, res) {
   const { id } = req.params
   const numericId = Number(id)
-  const { homeId, awayId, homeScore, awayScore, played } = req.body || {}
+  const { homeId, awayId, homeScore, awayScore, played, stage, slot } = req.body || {}
 
   const existing = await prisma.match.findUnique({ where: { id: numericId } })
   if (!existing) {
@@ -80,9 +142,30 @@ async function updateMatch(req, res) {
     return res.status(400).json({ error: 'Valid home and away scores are required' })
   }
 
+  const { stage: resolvedStage, slot: resolvedSlot, error: slotError } = await validateStageSlot(
+    stage !== undefined ? stage : existing.stage,
+    slot !== undefined ? Number(slot) : existing.slot,
+    numericId,
+  )
+  if (slotError) {
+    return res.status(400).json({ error: slotError })
+  }
+
+  if (isKnockoutStage(resolvedStage) && isPlayed && hScore === aScore) {
+    return res.status(400).json({ error: 'Knockout matches cannot end in a draw' })
+  }
+
   const match = await prisma.match.update({
     where: { id: numericId },
-    data: { homeId: home, awayId: away, homeScore: hScore, awayScore: aScore, played: isPlayed },
+    data: {
+      homeId: home,
+      awayId: away,
+      homeScore: hScore,
+      awayScore: aScore,
+      played: isPlayed,
+      stage: resolvedStage,
+      slot: resolvedSlot,
+    },
     ...matchInclude,
   })
   res.json(match)

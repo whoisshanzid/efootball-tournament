@@ -43,7 +43,7 @@ export default function AdminDashboard() {
   const loadMatches = useCallback(async () => {
     try {
       const { data } = await api.get('/matches')
-      setMatches(data)
+      setMatches(data.filter((m) => (m.stage || 'GROUP') === 'GROUP'))
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to load matches'))
     } finally {
@@ -255,9 +255,7 @@ export default function AdminDashboard() {
         <div className="space-y-5">
           <MatchForm
             players={players}
-            initial={editingMatch}
-            onSubmit={(data) => handleMatchSubmit(data, editingMatch)}
-            onCancel={editingMatch ? () => setEditingMatch(null) : null}
+            onSubmit={(data) => handleMatchSubmit(data, null)}
             submitting={busy}
           />
 
@@ -282,6 +280,21 @@ export default function AdminDashboard() {
               <ul className="divide-y divide-line/60">
                 {matches.map((m) => {
                   const played = m.played && m.homeScore != null && m.awayScore != null
+
+                  if (editingMatch?.id === m.id) {
+                    return (
+                      <li key={m.id} className="p-4 sm:p-5">
+                        <MatchForm
+                          players={players}
+                          initial={m}
+                          onSubmit={(data) => handleMatchSubmit(data, m)}
+                          onCancel={() => setEditingMatch(null)}
+                          submitting={busy}
+                        />
+                      </li>
+                    )
+                  }
+
                   return (
                     <li key={m.id} className="flex flex-wrap items-center gap-3 px-5 py-3 transition-colors hover:bg-panel-2/40 sm:flex-nowrap">
                       <div className="flex min-w-0 flex-1 items-center gap-2">

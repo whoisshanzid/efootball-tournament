@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function resultBadge(m) {
   if (m.homeScore > m.awayScore) return { text: 'Home win', cls: 'text-pitch' }
   if (m.homeScore < m.awayScore) return { text: 'Away win', cls: 'text-sky-400' }
@@ -9,7 +11,12 @@ function PlayedCard({ m }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-pitch/25 bg-gradient-to-r from-pitch/10 via-panel/60 to-panel/60 px-4 py-3 transition-all hover:border-pitch/50 hover:shadow-lg hover:shadow-pitch/10">
       <div className="flex flex-1 items-center justify-end gap-2 truncate">
-        <span className="truncate text-right font-semibold text-ink">{m.home.name}</span>
+        <Link
+          to={`/player/${m.home.id}`}
+          className="truncate text-right font-semibold text-ink underline-offset-4 transition-colors hover:text-pitch hover:underline"
+        >
+          {m.home.name}
+        </Link>
       </div>
 
       <div className="flex shrink-0 flex-col items-center rounded-2xl border border-pitch/40 bg-night/60 px-5 py-1.5">
@@ -20,7 +27,12 @@ function PlayedCard({ m }) {
       </div>
 
       <div className="flex flex-1 items-center gap-2 truncate">
-        <span className="truncate font-semibold text-ink">{m.away.name}</span>
+        <Link
+          to={`/player/${m.away.id}`}
+          className="truncate font-semibold text-ink underline-offset-4 transition-colors hover:text-pitch hover:underline"
+        >
+          {m.away.name}
+        </Link>
       </div>
 
       <span
@@ -36,7 +48,12 @@ function UpcomingCard({ m }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line bg-panel/30 px-4 py-3 transition-all hover:border-amber-400/50 hover:bg-panel/50">
       <div className="flex flex-1 items-center justify-end gap-2 truncate">
-        <span className="truncate text-right font-semibold text-muted">{m.home.name}</span>
+        <Link
+          to={`/player/${m.home.id}`}
+          className="truncate text-right font-semibold text-muted underline-offset-4 transition-colors hover:text-pitch hover:underline"
+        >
+          {m.home.name}
+        </Link>
       </div>
 
       <div className="flex shrink-0 flex-col items-center rounded-2xl border border-line bg-panel-2/60 px-5 py-1.5">
@@ -51,7 +68,12 @@ function UpcomingCard({ m }) {
       </div>
 
       <div className="flex flex-1 items-center gap-2 truncate">
-        <span className="truncate font-semibold text-muted">{m.away.name}</span>
+        <Link
+          to={`/player/${m.away.id}`}
+          className="truncate font-semibold text-muted underline-offset-4 transition-colors hover:text-pitch hover:underline"
+        >
+          {m.away.name}
+        </Link>
       </div>
     </div>
   )

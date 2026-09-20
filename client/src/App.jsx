@@ -2,6 +2,9 @@ import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Logo from './components/Logo'
 import Home from './pages/Home'
+import Players from './pages/Players'
+import PlayerProfile from './pages/PlayerProfile'
+import Knockout from './pages/Knockout'
 import Login from './pages/Login'
 import AdminDashboard from './pages/AdminDashboard'
 import { useAuth } from './context/AuthContext'
@@ -33,6 +36,9 @@ export default function App() {
       <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/player/:id" element={<PlayerProfile />} />
+          <Route path="/knockout" element={<Knockout />} />
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />

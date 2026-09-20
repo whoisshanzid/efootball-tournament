@@ -36,7 +36,7 @@ export default function Home() {
     try {
       const [standingsRes, matchesRes] = await Promise.all([api.get('/standings'), api.get('/matches')])
       setStandings(standingsRes.data)
-      setMatches(matchesRes.data)
+      setMatches(matchesRes.data.filter((m) => (m.stage || 'GROUP') === 'GROUP'))
       setLastUpdated(new Date())
     } catch {
       if (!asSilent) {
@@ -91,8 +91,8 @@ export default function Home() {
             <p className="mt-2 max-w-xl text-sm text-muted">
               Win <span className="font-semibold text-pitch">3 pts</span> · Draw{' '}
               <span className="font-semibold text-amber-400">1 pt</span> · Loss{' '}
-              <span className="font-semibold text-red-400">0 pts</span> — Top 8 advance to the
-              Super 8 knockout stage.
+              <span className="font-semibold text-red-400">0 pts</span> — Top 16 advance to the
+              Super 16 knockout stage.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export default function Home() {
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-4">
           <ZoneLegend />
           <p className="text-[11px] text-muted">
-            Blue = Super 8 (1–8) · Yellow = Playoff zone (9–24) · Red = Eliminated (25+)
+            Blue = Super 16 (1–16) · Yellow = Playoff zone (17–24) · Red = Eliminated (25+)
           </p>
         </div>
       </section>

@@ -28,6 +28,8 @@ model Match {
   homeScore Int?
   awayScore Int?
   played    Boolean  @default(false)
+  stage     String   @default("GROUP")
+  slot      Int      @default(0)
   createdAt DateTime @default(now())
   home      Player   @relation("home", fields: [homeId], references: [id], onDelete: Cascade)
   away      Player   @relation("away", fields: [awayId], references: [id], onDelete: Cascade)

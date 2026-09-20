@@ -1,13 +1,15 @@
+import { Link } from 'react-router-dom'
+
 export const ZONES = {
-  super8: {
-    match: (rank) => rank <= 8,
+  super16: {
+    match: (rank) => rank <= 16,
     color: '#38bdf8',
     border: 'border-sky-400',
-    label: 'Super 8',
+    label: 'Super 16',
     description: 'Inside knockout stage',
   },
   playoff: {
-    match: (rank) => rank > 8 && rank <= 24,
+    match: (rank) => rank > 16 && rank <= 24,
     color: '#eab308',
     border: 'border-yellow-400',
     label: 'Playoff Zone',
@@ -23,8 +25,8 @@ export const ZONES = {
 }
 
 export function getZone(rank) {
-  return ZONES.super8.match(rank)
-    ? ZONES.super8
+  return ZONES.super16.match(rank)
+    ? ZONES.super16
     : ZONES.playoff.match(rank)
       ? ZONES.playoff
       : ZONES.eliminated
@@ -102,7 +104,12 @@ export default function StandingsTable({ standings, loading }) {
                   </td>
                   <td className="px-3 py-3.5">
                     <div>
-                      <p className="font-semibold text-ink">{row.name}</p>
+                      <Link
+                        to={`/player/${row.playerId}`}
+                        className="font-semibold text-ink underline-offset-4 transition-colors hover:text-pitch hover:underline"
+                      >
+                        {row.name}
+                      </Link>
                       {row.team && <p className="text-xs text-muted">{row.team}</p>}
                     </div>
                   </td>
