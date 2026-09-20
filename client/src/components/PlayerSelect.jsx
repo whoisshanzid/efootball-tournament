@@ -26,11 +26,17 @@ export default function PlayerSelect({
   }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const onMouseDown = (e) => {
+    const onDown = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false)
     }
-    document.addEventListener('mousedown', onMouseDown)
-    return () => document.removeEventListener('mousedown', onMouseDown)
+    document.addEventListener('pointerdown', onDown)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+    }
   }, [])
 
   const filterQuery = touched ? query.trim().toLowerCase() : ''
@@ -103,6 +109,8 @@ export default function PlayerSelect({
               setTouched(true)
               setOpen(true)
             }}
+            onPointerDown={() => setOpen(true)}
+            onMouseDown={() => setOpen(true)}
             onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
             placeholder={placeholder}
@@ -141,6 +149,10 @@ export default function PlayerSelect({
                     <li key={p.id}>
                       <button
                         type="button"
+                        onPointerDown={(e) => {
+                          e.preventDefault()
+                          select(p)
+                        }}
                         onMouseDown={(e) => {
                           e.preventDefault()
                           select(p)
