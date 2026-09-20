@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 
 export const ZONES = {
   super16: {
-    match: (rank) => rank <= 16,
+    match: (rank) => rank <= 8,
     color: '#38bdf8',
     border: 'border-sky-400',
     label: 'Super 16',
     description: 'Inside knockout stage',
   },
   playoff: {
-    match: (rank) => rank > 16 && rank <= 24,
+    match: (rank) => rank > 8 && rank <= 24,
     color: '#eab308',
     border: 'border-yellow-400',
     label: 'Playoff Zone',
@@ -65,20 +65,20 @@ export default function StandingsTable({ standings, loading }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-panel/60 shadow-xl shadow-black/20">
-      <div className="overflow-x-auto">
+      <div className="max-h-[70vh] overflow-auto">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
-            <tr className="border-b border-line bg-panel-2/60 text-left text-xs uppercase tracking-wider text-muted">
-              <th className="w-12 px-3 py-3.5 pl-4 font-semibold">#</th>
-              <th className="px-3 py-3.5 font-semibold">Player</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Played">P</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Won">W</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Drawn">D</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Lost">L</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Goals For">GF</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Goals Against">GA</th>
-              <th className="px-3 py-3.5 text-center font-semibold" title="Goal Difference">GD</th>
-              <th className="px-3 py-3.5 pr-4 text-right font-semibold" title="Points">Pts</th>
+            <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
+              <th className="sticky top-0 z-10 w-12 bg-panel-2 px-3 py-3.5 pl-4 font-semibold">#</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 font-semibold">Player</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Played">P</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Won">W</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Drawn">D</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Lost">L</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Goals For">GF</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Goals Against">GA</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 text-center font-semibold" title="Goal Difference">GD</th>
+              <th className="sticky top-0 z-10 bg-panel-2 px-3 py-3.5 pr-4 text-right font-semibold" title="Points">Pts</th>
             </tr>
           </thead>
           <tbody>
