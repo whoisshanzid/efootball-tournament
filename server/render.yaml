@@ -12,4 +12,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://efootball-tournament-tpha.vercel.app
+        value: https://efootball-tournament-tpha.vercel.app,https://uufctournamenthub.vercel.app
