@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import api from '../api/client'
+import toast from 'react-hot-toast'
+import api, { getErrorMessage } from '../api/client'
 import Logo from '../components/Logo'
+import ConfirmModal from '../components/ConfirmModal'
+import { useAuth } from '../context/AuthContext'
 
 function formatWinRate(r) {
   return Number.isInteger(r) ? String(r) : r.toFixed(1).replace(/\.0$/, '')
@@ -24,7 +27,7 @@ const resultStyles = {
   PENDING: { text: 'Upcoming', cls: 'bg-panel-2 text-muted border-line' },
 }
 
-function HistoryRow({ m, playerName }) {
+function HistoryRow({ m, playerName, canDelete, onDelete }) {
   const badge = resultStyles[m.result] || resultStyles.PENDING
   const played = m.played
   return (
@@ -34,6 +37,9 @@ function HistoryRow({ m, playerName }) {
       }`}
     >
       <span className={`hidden h-2.5 w-2.5 shrink-0 rounded-full sm:block ${played ? 'bg-pitch' : 'bg-muted/40'}`} />
+      <span className="shrink-0 rounded-md border border-line bg-panel-2 px-2 py-0.5 text-[11px] font-bold tabular-nums text-muted">
+        #{m.matchId}
+      </span>
       <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center sm:gap-2">
         <span className="truncate text-xs text-muted">
           <span className="font-semibold text-ink">{playerName}</span>
@@ -66,16 +72,28 @@ function HistoryRow({ m, playerName }) {
       >
         {badge.text}
       </span>
+
+      {canDelete && (
+        <button
+          onClick={() => onDelete(m)}
+          className="shrink-0 rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-red-400"
+        >
+          Delete
+        </button>
+      )}
     </div>
   )
 }
 
 export default function PlayerProfile() {
   const { id } = useParams()
+  const { isAuthenticated } = useAuth()
   const [data, setData] = useState(null)
   const [status, setStatus] = useState('loading')
+  const [deletingMatch, setDeletingMatch] = useState(null)
+  const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let alive = true
     setStatus('loading')
     api
@@ -93,6 +111,25 @@ export default function PlayerProfile() {
       alive = false
     }
   }, [id])
+
+  useEffect(() => {
+    return load()
+  }, [load])
+
+  const confirmDelete = async () => {
+    if (!deletingMatch) return
+    setBusy(true)
+    try {
+      await api.delete(`/matches/${deletingMatch.matchId}`)
+      toast.success(`Match #${deletingMatch.matchId} deleted`)
+      setDeletingMatch(null)
+      load()
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to delete match'))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   if (status === 'loading') {
     return (
@@ -187,11 +224,27 @@ export default function PlayerProfile() {
         ) : (
           <div className="space-y-2">
             {data.matches.map((m) => (
-              <HistoryRow key={m.matchId} m={m} playerName={player.name} />
+              <HistoryRow
+                key={m.matchId}
+                m={m}
+                playerName={player.name}
+                canDelete={isAuthenticated}
+                onDelete={setDeletingMatch}
+              />
             ))}
           </div>
         )}
       </section>
+
+      <ConfirmModal
+        open={Boolean(deletingMatch)}
+        title="Delete match?"
+        message={`Match #${deletingMatch?.matchId} — ${player.name} vs ${deletingMatch?.opponent?.name}. It will be permanently removed and stats recalculated.`}
+        confirmLabel="Delete Match"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingMatch(null)}
+        busy={busy}
+      />
     </div>
   )
 }

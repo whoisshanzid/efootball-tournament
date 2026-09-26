@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import api, { getErrorMessage } from '../api/client'
 import PlayerForm from '../components/PlayerForm'
@@ -28,6 +28,8 @@ export default function AdminDashboard() {
   const [newUsername, setNewUsername] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [matchQuery, setMatchQuery] = useState('')
+  const [createFormVersion, setCreateFormVersion] = useState(0)
 
   const loadPlayers = useCallback(async () => {
     try {
@@ -55,6 +57,15 @@ export default function AdminDashboard() {
     loadPlayers()
     loadMatches()
   }, [loadPlayers, loadMatches])
+
+  const visibleMatches = useMemo(() => {
+    const q = matchQuery.trim().toLowerCase()
+    if (!q) return matches
+    return matches.filter(
+      (m) =>
+        m.home?.name?.toLowerCase().includes(q) || m.away?.name?.toLowerCase().includes(q)
+    )
+  }, [matches, matchQuery])
 
   const resetForms = () => {
     setEditingPlayer(null)
@@ -89,6 +100,8 @@ export default function AdminDashboard() {
       } else {
         await api.post('/matches', data)
         toast.success('Match created')
+        setCreateFormVersion((v) => v + 1)
+        setMatchQuery('')
       }
       resetForms()
       await Promise.all([loadMatches(), loadPlayers()])
@@ -254,17 +267,35 @@ export default function AdminDashboard() {
       {tab === 'matches' && (
         <div className="space-y-5">
           <MatchForm
+            key={`create-${createFormVersion}`}
             players={players}
             onSubmit={(data) => handleMatchSubmit(data, null)}
             submitting={busy}
           />
 
           <div className="overflow-hidden rounded-2xl border border-line bg-panel/60">
-            <div className="flex items-center justify-between border-b border-line bg-panel-2/60 px-5 py-3.5">
+            <div className="flex flex-col gap-3 border-b border-line bg-panel-2/60 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-sm font-bold uppercase tracking-widest text-muted">
-                All Matches ({matches.length})
+                All Matches ({visibleMatches.length}
+                {matchQuery.trim() ? ` of ${matches.length}` : ''})
               </h3>
-              <span className="text-xs text-muted">Newest first</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={matchQuery}
+                  onChange={(e) => setMatchQuery(e.target.value)}
+                  placeholder="Search by player name…"
+                  className="w-full rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-xs text-ink outline-none transition-colors placeholder:text-muted/50 focus:border-pitch focus:ring-2 focus:ring-pitch/20 sm:w-52"
+                />
+                {matchQuery.trim() && (
+                  <button
+                    onClick={() => setMatchQuery('')}
+                    className="rounded-lg border border-line bg-panel-2 px-2.5 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-ink"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
             {loadingMatches ? (
               <div className="space-y-2 p-5">
@@ -276,9 +307,13 @@ export default function AdminDashboard() {
               <p className="px-5 py-10 text-center text-sm text-muted">
                 No matches yet. Create one above!
               </p>
+            ) : visibleMatches.length === 0 ? (
+              <p className="px-5 py-10 text-center text-sm text-muted">
+                No matches found for “{matchQuery.trim()}”.
+              </p>
             ) : (
               <ul className="divide-y divide-line/60">
-                {matches.map((m) => {
+                {visibleMatches.map((m) => {
                   const played = m.played && m.homeScore != null && m.awayScore != null
 
                   if (editingMatch?.id === m.id) {
@@ -297,6 +332,9 @@ export default function AdminDashboard() {
 
                   return (
                     <li key={m.id} className="flex flex-wrap items-center gap-3 px-5 py-3 transition-colors hover:bg-panel-2/40 sm:flex-nowrap">
+                      <span className="shrink-0 rounded-md border border-line bg-panel-2 px-2 py-0.5 text-[11px] font-bold tabular-nums text-muted">
+                        #{m.id}
+                      </span>
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         <span className="max-w-[130px] truncate font-semibold text-ink">{m.home.name}</span>
                         <span className="shrink-0 rounded-lg border border-line bg-panel-2 px-2.5 py-1 text-sm font-black tracking-wider text-ink">
