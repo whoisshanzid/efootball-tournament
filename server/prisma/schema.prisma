@@ -18,6 +18,7 @@ model Player {
   id          Int     @id @default(autoincrement())
   name        String  @unique
   team        String?
+  active      Boolean @default(true)
   homeMatches Match[] @relation("home")
   awayMatches Match[] @relation("away")
 }

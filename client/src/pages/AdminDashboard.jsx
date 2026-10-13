@@ -67,6 +67,20 @@ export default function AdminDashboard() {
     )
   }, [matches, matchQuery])
 
+  const activePlayers = useMemo(() => players.filter((p) => p.active !== false), [players])
+
+  const matchPlayers = useMemo(() => {
+    const selectedIds = new Set()
+    if (editingMatch) {
+      if (editingMatch.homeId) selectedIds.add(editingMatch.homeId)
+      if (editingMatch.awayId) selectedIds.add(editingMatch.awayId)
+    }
+    const extras = players.filter(
+      (p) => selectedIds.has(p.id) && !activePlayers.some((a) => a.id === p.id)
+    )
+    return [...activePlayers, ...extras]
+  }, [activePlayers, players, editingMatch])
+
   const resetForms = () => {
     setEditingPlayer(null)
     setEditingMatch(null)
@@ -107,6 +121,20 @@ export default function AdminDashboard() {
       await Promise.all([loadMatches(), loadPlayers()])
     } catch (err) {
       toast.error(getErrorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const togglePlayerActive = async (player) => {
+    setBusy(true)
+    try {
+      const nextActive = player.active === false
+      await api.put(`/players/${player.id}`, { active: nextActive })
+      toast.success(nextActive ? `"${player.name}" activated` : `"${player.name}" deactivated`)
+      await loadPlayers()
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to update player'))
     } finally {
       setBusy(false)
     }
@@ -237,12 +265,26 @@ export default function AdminDashboard() {
                 {players.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-panel-2/40">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-ink">{p.name}</p>
+                      <p className="flex items-center gap-2 truncate font-semibold text-ink">
+                        <span className="truncate">{p.name}</span>
+                        {p.active === false && (
+                          <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-400">
+                            Inactive
+                          </span>
+                        )}
+                      </p>
                       <p className="truncate text-xs text-muted">
                         {p.team || 'No team'} · {p._count.homeMatches + p._count.awayMatches} matches
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-1.5">
+                      <button
+                        onClick={() => togglePlayerActive(p)}
+                        disabled={busy}
+                        className="rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-amber-400 disabled:opacity-50"
+                      >
+                        {p.active === false ? 'Activate' : 'Deactivate'}
+                      </button>
                       <button
                         onClick={() => setEditingPlayer(p)}
                         className="rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-xs font-semibold text-muted transition-colors hover:text-pitch"
@@ -268,7 +310,7 @@ export default function AdminDashboard() {
         <div className="space-y-5">
           <MatchForm
             key={`create-${createFormVersion}`}
-            players={players}
+            players={activePlayers}
             onSubmit={(data) => handleMatchSubmit(data, null)}
             submitting={busy}
           />
@@ -320,7 +362,7 @@ export default function AdminDashboard() {
                     return (
                       <li key={m.id} className="p-4 sm:p-5">
                         <MatchForm
-                          players={players}
+                          players={matchPlayers}
                           initial={m}
                           onSubmit={(data) => handleMatchSubmit(data, m)}
                           onCancel={() => setEditingMatch(null)}

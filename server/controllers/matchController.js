@@ -11,9 +11,14 @@ const matchInclude = {
 
 const SLOT_RANGES = { R16: [1, 8], QF: [1, 4], SF: [1, 2], F: [1, 1] }
 const KNOCKOUT_STAGES = Object.keys(SLOT_RANGES)
+const LEAGUE_STAGES = ['GROUP', 'PLAYOFF']
 
 function isKnockoutStage(stage) {
   return KNOCKOUT_STAGES.includes(stage)
+}
+
+function isLeagueStage(stage) {
+  return LEAGUE_STAGES.includes(stage)
 }
 
 function isInt(n) {
@@ -23,11 +28,11 @@ function isInt(n) {
 async function validateStageSlot(stage, slot, excludeMatchId = null) {
   const resolvedStage = stage === undefined || stage === null ? 'GROUP' : stage
 
-  if (resolvedStage !== 'GROUP' && !isKnockoutStage(resolvedStage)) {
+  if (!isLeagueStage(resolvedStage) && !isKnockoutStage(resolvedStage)) {
     return { stage: 'GROUP', slot: 0, error: 'Invalid stage' }
   }
 
-  if (resolvedStage === 'GROUP') {
+  if (isLeagueStage(resolvedStage)) {
     return { stage: resolvedStage, slot: 0, error: null }
   }
 

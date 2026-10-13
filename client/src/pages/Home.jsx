@@ -116,7 +116,7 @@ export default function Home() {
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line/60 pt-4">
           <ZoneLegend />
           <p className="text-[11px] text-muted">
-            Blue = Super 16 (1–16) · Yellow = Playoff zone (17–24) · Red = Eliminated (25+)
+            Blue = Super 16 (1–8) · Yellow = Playoff league (9–22) · Red = Eliminated (23+)
           </p>
         </div>
       </section>

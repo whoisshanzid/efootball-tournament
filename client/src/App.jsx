@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Players from './pages/Players'
 import PlayerProfile from './pages/PlayerProfile'
 import Knockout from './pages/Knockout'
+import Playoff from './pages/Playoff'
 import Login from './pages/Login'
 import AdminDashboard from './pages/AdminDashboard'
 import { useAuth } from './context/AuthContext'
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/players" element={<Players />} />
           <Route path="/player/:id" element={<PlayerProfile />} />
           <Route path="/knockout" element={<Knockout />} />
+          <Route path="/playoff" element={<Playoff />} />
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />

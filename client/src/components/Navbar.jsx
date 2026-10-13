@@ -39,6 +39,9 @@ export default function Navbar() {
           <NavLink to="/players" className={linkClass}>
             Players
           </NavLink>
+          <NavLink to="/playoff" className={linkClass}>
+            Playoffs
+          </NavLink>
           <NavLink to="/knockout" className={linkClass}>
             Super 16
           </NavLink>

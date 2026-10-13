@@ -1,6 +1,6 @@
 import { CSV_PREFIX } from '../config'
 
-export function downloadStandingsCSV(standings) {
+export function downloadStandingsCSV(standings, label = 'point-table') {
   const headers = ['Rank', 'Player', 'Team', 'P', 'W', 'D', 'L', 'GF', 'GA', 'GD', 'Pts']
   const rows = standings.map((r) => [
     r.rank,
@@ -26,7 +26,7 @@ export function downloadStandingsCSV(standings) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${CSV_PREFIX}-point-table-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `${CSV_PREFIX}-${label}-${new Date().toISOString().slice(0, 10)}.csv`
   document.body.appendChild(a)
   a.click()
   a.remove()

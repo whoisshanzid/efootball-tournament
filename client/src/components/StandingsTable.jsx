@@ -9,14 +9,14 @@ export const ZONES = {
     description: 'Inside knockout stage',
   },
   playoff: {
-    match: (rank) => rank > 8 && rank <= 24,
+    match: (rank) => rank > 8 && rank <= 22,
     color: '#eab308',
     border: 'border-yellow-400',
     label: 'Playoff Zone',
     description: 'Fighting for a knockout spot',
   },
   eliminated: {
-    match: (rank) => rank > 24,
+    match: (rank) => rank > 22,
     color: '#f87171',
     border: 'border-red-400',
     label: 'Eliminated',
@@ -38,7 +38,14 @@ const rankBadge = {
   3: 'bg-bronze/15 text-bronze',
 }
 
-export default function StandingsTable({ standings, loading }) {
+export default function StandingsTable({
+  standings,
+  loading,
+  title = null,
+  qualifyCount = null,
+  emptyTitle = 'No matches played yet',
+  emptyMessage = 'Standings will appear once matches have scores.',
+}) {
   if (loading) {
     return (
       <div className="overflow-hidden rounded-2xl border border-line bg-panel/60">
@@ -57,14 +64,24 @@ export default function StandingsTable({ standings, loading }) {
     return (
       <div className="rounded-2xl border border-line bg-panel/60 py-16 text-center">
         <div className="mb-3 text-4xl">⚽</div>
-        <h3 className="text-lg font-semibold">No matches played yet</h3>
-        <p className="mt-1 text-sm text-muted">Standings will appear once matches have scores.</p>
+        <h3 className="text-lg font-semibold">{emptyTitle}</h3>
+        <p className="mt-1 text-sm text-muted">{emptyMessage}</p>
       </div>
     )
   }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-panel/60 shadow-xl shadow-black/20">
+      {title && (
+        <div className="flex items-center justify-between border-b border-line bg-panel-2/60 px-5 py-3.5">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-muted">{title}</h3>
+          {qualifyCount != null && (
+            <span className="rounded-full bg-pitch/15 px-2.5 py-0.5 text-[11px] font-bold text-pitch">
+              Top {qualifyCount} qualify
+            </span>
+          )}
+        </div>
+      )}
       <div className="max-h-[70vh] overflow-auto">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
@@ -84,13 +101,16 @@ export default function StandingsTable({ standings, loading }) {
           <tbody>
             {standings.map((row) => {
               const isTop = row.rank <= 3
-              const zone = getZone(row.rank)
+              const isQualified = qualifyCount != null && row.rank <= qualifyCount
+              const zone = qualifyCount != null
+                ? { color: isQualified ? '#4ade80' : '#f87171' }
+                : getZone(row.rank)
               return (
                 <tr
                   key={row.playerId}
                   style={{ boxShadow: `inset 4px 0 0 0 ${zone.color}` }}
                   className={`border-b border-line/60 bg-gradient-to-r from-transparent to-transparent transition-colors last:border-0 hover:from-white/[0.02] hover:to-white/[0.01] ${
-                    isTop ? 'bg-panel-2/40' : ''
+                    isTop ? 'bg-panel-2/40' : isQualified ? 'bg-pitch/5' : ''
                   }`}
                 >
                   <td className="px-3 py-3.5 pl-4">
@@ -104,12 +124,19 @@ export default function StandingsTable({ standings, loading }) {
                   </td>
                   <td className="px-3 py-3.5">
                     <div>
-                      <Link
-                        to={`/player/${row.playerId}`}
-                        className="font-semibold text-ink underline-offset-4 transition-colors hover:text-pitch hover:underline"
-                      >
-                        {row.name}
-                      </Link>
+                      <span className="inline-flex items-center gap-2">
+                        <Link
+                          to={`/player/${row.playerId}`}
+                          className="font-semibold text-ink underline-offset-4 transition-colors hover:text-pitch hover:underline"
+                        >
+                          {row.name}
+                        </Link>
+                        {row.active === false && (
+                          <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-400">
+                            Inactive
+                          </span>
+                        )}
+                      </span>
                       {row.team && <p className="text-xs text-muted">{row.team}</p>}
                     </div>
                   </td>

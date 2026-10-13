@@ -18,7 +18,7 @@ async function getPlayerProfile(req, res) {
 
   const player = await prisma.player.findUnique({
     where: { id },
-    select: { id: true, name: true, team: true },
+    select: { id: true, name: true, team: true, active: true },
   })
   if (!player) {
     return res.status(404).json({ error: 'Player not found' })
@@ -102,7 +102,7 @@ async function getPlayerProfile(req, res) {
 }
 
 async function createPlayer(req, res) {
-  const { name, team } = req.body || {}
+  const { name, team, active } = req.body || {}
 
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Player name is required' })
@@ -110,7 +110,11 @@ async function createPlayer(req, res) {
 
   try {
     const player = await prisma.player.create({
-      data: { name: name.trim(), team: team?.trim() || null },
+      data: {
+        name: name.trim(),
+        team: team?.trim() || null,
+        active: active === undefined ? true : Boolean(active),
+      },
     })
     res.status(201).json(player)
   } catch (e) {
@@ -123,7 +127,7 @@ async function createPlayer(req, res) {
 
 async function updatePlayer(req, res) {
   const { id } = req.params
-  const { name, team } = req.body || {}
+  const { name, team, active } = req.body || {}
   const numericId = Number(id)
 
   const existing = await prisma.player.findUnique({ where: { id: numericId } })
@@ -137,6 +141,7 @@ async function updatePlayer(req, res) {
       data: {
         name: name !== undefined ? name.trim() : existing.name,
         team: team !== undefined ? team.trim() || null : existing.team,
+        active: active !== undefined ? Boolean(active) : existing.active,
       },
     })
     res.json(player)
