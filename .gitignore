@@ -5,3 +5,4 @@ server/dev.db-journal
 server/.env
 .DS_Store
 *.log
+session-*.md
